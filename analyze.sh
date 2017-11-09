@@ -1,24 +1,30 @@
 #!/bin/bash
 
-RESFILE=endpoint_scan_results.txt
+RESFILE=$1
+if [ "$RESFILE" == "" ]
+then
+ echo "Usage:"
+ echo "$0 report file to be analyzed"
+ exit 0
+fi
 
 echo Total hosts scanned:
-echo $(cat $RESFILE | wc -l)
+echo $(expr $(cat $RESFILE | wc -l) - 1)
 
 echo Successful:
-echo $(grep successful $RESFILE |  wc -l)
+echo $(grep success $RESFILE |  wc -l)
 
 echo Failed:
-echo $(grep failed $RESFILE |  wc -l)
+echo $(grep fail $RESFILE |  wc -l)
 
 echo Failure reasons:
-REASONS="$(grep "failed" $RESFILE | cut -f3 -d: | sort | uniq)"
+REASONS=$(grep fail $RESFILE | cut -f7- -d, | sort | uniq)
 
 IFS=$'\n'
 for REASON in $REASONS
 do
  IFS=" "
- echo "$REASON"
+ echo $REASON
  REASON=$(echo "$REASON" | sed -e 's/[][]/\\&/g')
  echo $(grep "$REASON" $RESFILE |  wc -l)
 done
